@@ -1,4 +1,4 @@
-package com.example;
+package com.coalbagaddon;
 
 import com.google.inject.Provides;
 import javax.inject.Inject;
@@ -14,15 +14,18 @@ import net.runelite.client.plugins.PluginDescriptor;
 
 @Slf4j
 @PluginDescriptor(
-	name = "Example"
+	name = "CoalBag Addon",
+	description = "Shows how much coal is in the coal bag.",
+	tags = {"coal", "bag", "addon"}
+
 )
-public class ExamplePlugin extends Plugin
+public class CoalBagPlugin extends Plugin
 {
 	@Inject
 	private Client client;
 
 	@Inject
-	private ExampleConfig config;
+	private CoalBagConfig config;
 
 	@Override
 	protected void startUp() throws Exception
@@ -46,8 +49,8 @@ public class ExamplePlugin extends Plugin
 	}
 
 	@Provides
-	ExampleConfig provideConfig(ConfigManager configManager)
+	CoalBagConfig provideConfig(ConfigManager configManager)
 	{
-		return configManager.getConfig(ExampleConfig.class);
+		return configManager.getConfig(CoalBagConfig.class);
 	}
 }
