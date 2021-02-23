@@ -9,7 +9,7 @@ public class CoalInBag
 		return String.valueOf(storedAmount);
 	}
 
-	public static void UpdateAmount(int stored)
+	public static void updateAmount(int stored)
 	{
 		storedAmount = stored;
 	}
