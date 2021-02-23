@@ -1,6 +1,6 @@
 package com.coalbagaddon;
 
-import com.google.inject.Provides;
+import java.util.regex.Pattern;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
@@ -11,6 +11,7 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.overlay.OverlayManager;
 
 @Slf4j
 @PluginDescriptor(
@@ -21,36 +22,29 @@ import net.runelite.client.plugins.PluginDescriptor;
 )
 public class CoalBagPlugin extends Plugin
 {
+	private static final int INVENTORY_SIZE = 28;
+
 	@Inject
 	private Client client;
 
 	@Inject
-	private CoalBagConfig config;
+	private OverlayManager overlayManager;
+
+	@Inject
+	private CoalBagOverlay coalBagOverlay;
 
 	@Override
-	protected void startUp() throws Exception
+	protected void startUp()
 	{
-		log.info("Example started!");
+		overlayManager.add(coalBagOverlay);
+		CoalInBag.UpdateAmount(-1);
+		log.info("CoalBag started!");
 	}
 
 	@Override
-	protected void shutDown() throws Exception
+	protected void shutDown()
 	{
-		log.info("Example stopped!");
-	}
-
-	@Subscribe
-	public void onGameStateChanged(GameStateChanged gameStateChanged)
-	{
-		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
-		{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + config.greeting(), null);
-		}
-	}
-
-	@Provides
-	CoalBagConfig provideConfig(ConfigManager configManager)
-	{
-		return configManager.getConfig(CoalBagConfig.class);
+		overlayManager.remove(coalBagOverlay);
+		log.info("CoalBag stopped!");
 	}
 }
