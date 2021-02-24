@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import javax.inject.Inject;
+import net.runelite.api.ItemID;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.ui.overlay.WidgetItemOverlay;
 import net.runelite.client.ui.overlay.components.TextComponent;
@@ -17,19 +18,22 @@ public class CoalBagOverlay extends WidgetItemOverlay
 	@Override
 	public void renderItemOverlay(Graphics2D graphics, int itemId, WidgetItem itemWidget)
 	{
-		final Rectangle bounds = itemWidget.getCanvasBounds();
-		final TextComponent textComponent = new TextComponent();
-		textComponent.setPosition(new Point(bounds.x -1, bounds.y + 8));
-		textComponent.setColor(Color.CYAN);
+		if (itemId == ItemID.COAL_BAG_12019 || itemId == ItemID.COAL_BAG)
+		{
+			final Rectangle bounds = itemWidget.getCanvasBounds();
+			final TextComponent textComponent = new TextComponent();
+			textComponent.setPosition(new Point(bounds.x - 1, bounds.y + 8));
+			textComponent.setColor(Color.CYAN);
 
-		if (CoalInBag.isUnknown())
-		{
-			textComponent.setText("?");
+			if (CoalInBag.isUnknown())
+			{
+				textComponent.setText("?");
+			}
+			else
+			{
+				textComponent.setText(CoalInBag.tellAmount());
+			}
+			textComponent.render(graphics);
 		}
-		else
-		{
-			textComponent.setText(CoalInBag.tellAmount());
-		}
-		textComponent.render(graphics);
 	}
 }

@@ -4,7 +4,7 @@ The coal bag plugin adds a counter to the coal bag to tell you how much coal is 
 ### Todo
 - [X] Setup plugin from the initial template.
 - [X] Add a counter to the coal bag.
-- [ ] Make the counter only appear on the coal bag.
+- [X] Make the counter only appear on the coal bag.
 - [X] Have counter reset to zero when checking a empty coal bag.
 - [X] Make it so that the counter updates when adding coal to the bag.
 - [ ] Make it so that the counter updates when removing coal from the bag.
