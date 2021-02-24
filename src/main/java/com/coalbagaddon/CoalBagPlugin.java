@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.events.ChatMessage;
+import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -15,7 +16,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 
 @Slf4j
 @PluginDescriptor(
-	name = "CoalBag Addon",
+	name = "Coal Bag",
 	description = "Shows how much coal is in the coal bag.",
 	tags = {"coal", "bag", "addon"}
 
@@ -112,6 +113,32 @@ public class CoalBagPlugin extends Plugin
 		if (matcher3.matches())
 		{
 			CoalInBag.updateAmount(0);
+		}
+	}
+
+	@Subscribe
+	public void onMenuOptionClicked(MenuOptionClicked event)
+	{
+		switch (event.getMenuOption())
+		{
+			case "Fill":
+				break;
+			case "Open":
+				break;
+			case "Check":
+				break;
+			case "Use":
+				break;
+			case "Empty":
+				CoalInBag.updateAmount(0);
+				break;
+			case "Destroy":
+				CoalInBag.updateAmount(-1);
+				break;
+			case "Examine":
+				break;
+			default:
+				break;
 		}
 	}
 
