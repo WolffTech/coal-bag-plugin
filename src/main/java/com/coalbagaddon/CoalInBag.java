@@ -14,11 +14,6 @@ public class CoalInBag
 		storedAmount = stored;
 	}
 
-	public static boolean isEmpty()
-	{
-		return storedAmount == 0;
-	}
-
 	public static boolean isUnknown()
 	{
 		return storedAmount < 0;

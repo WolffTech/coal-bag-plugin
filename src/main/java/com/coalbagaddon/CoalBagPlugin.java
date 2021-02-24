@@ -7,10 +7,7 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
-import net.runelite.api.GameState;
 import net.runelite.api.events.ChatMessage;
-import net.runelite.api.events.GameStateChanged;
-import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -25,6 +22,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 )
 public class CoalBagPlugin extends Plugin
 {
+	private static final Pattern BAG_EMPTY_MESSAGE = Pattern.compile("^The coal bag is empty\\.$");
 	private static final Pattern BAG_ONE_MESSAGE = Pattern.compile("^The coal bag contains one piece of coal\\.$");
 	private static final Pattern BAG_MANY_MESSAGE = Pattern.compile("^The coal bag contains ([\\d]+)? pieces? of coal\\.$");
 	private static final ImmutableMap<String, Integer> GRAB_NUMBER = ImmutableMap.<String, Integer>builder()
@@ -82,6 +80,13 @@ public class CoalBagPlugin extends Plugin
 		log.info("CoalBag started!");
 	}
 
+	@Override
+	protected void shutDown()
+	{
+		overlayManager.remove(coalBagOverlay);
+		log.info("CoalBag stopped!");
+	}
+
 	@Subscribe
 	public void onChatMessage(ChatMessage event)
 	{
@@ -102,12 +107,12 @@ public class CoalBagPlugin extends Plugin
 			final int num = GRAB_NUMBER.get(matcher2.group(1));
 			CoalInBag.updateAmount((num));
 		}
+
+		Matcher matcher3 = BAG_EMPTY_MESSAGE.matcher(event.getMessage());
+		if (matcher3.matches())
+		{
+			CoalInBag.updateAmount(0);
+		}
 	}
 
-	@Override
-	protected void shutDown()
-	{
-		overlayManager.remove(coalBagOverlay);
-		log.info("CoalBag stopped!");
-	}
 }
