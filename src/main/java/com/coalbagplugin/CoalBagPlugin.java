@@ -22,7 +22,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.coalbagaddon;
+package com.coalbagplugin;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

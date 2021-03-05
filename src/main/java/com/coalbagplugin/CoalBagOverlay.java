@@ -22,24 +22,42 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.coalbagaddon;
+package com.coalbagplugin;
 
-public class CoalInBag
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
+import javax.inject.Inject;
+import net.runelite.api.ItemID;
+import net.runelite.api.widgets.WidgetItem;
+import net.runelite.client.ui.overlay.WidgetItemOverlay;
+import net.runelite.client.ui.overlay.components.TextComponent;
+
+public class CoalBagOverlay extends WidgetItemOverlay
 {
-	private static int storedAmount;
+	@Inject
+	CoalBagOverlay() { showOnInventory(); }
 
-	public static String tellAmount()
+	@Override
+	public void renderItemOverlay(Graphics2D graphics, int itemId, WidgetItem itemWidget)
 	{
-		return String.valueOf(storedAmount);
-	}
+		if (itemId == ItemID.COAL_BAG_12019 || itemId == ItemID.COAL_BAG)
+		{
+			final Rectangle bounds = itemWidget.getCanvasBounds();
+			final TextComponent textComponent = new TextComponent();
+			textComponent.setPosition(new Point(bounds.x - 1, bounds.y + 8));
+			textComponent.setColor(Color.CYAN);
 
-	public static void updateAmount(int stored)
-	{
-		storedAmount = stored;
-	}
-
-	public static boolean isUnknown()
-	{
-		return storedAmount < 0;
+			if (CoalInBag.isUnknown())
+			{
+				textComponent.setText("?");
+			}
+			else
+			{
+				textComponent.setText(CoalInBag.tellAmount());
+			}
+			textComponent.render(graphics);
+		}
 	}
 }
