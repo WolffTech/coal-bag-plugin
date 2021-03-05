@@ -1,2 +1,16 @@
 # Coal Bag Addon
-The coal bag plugin adds a counter to the coal bag to tell you how much coal is in the bag. The plugin will not remember how much coal is in the bag from the last login, and will reset any time the plugin is reloaded. It doesn't keep track of coal that has been added while the bag is opened. This whole plugin was mostly copied from Adam's esspouch plugin and there's probably better ways to do this. I did this to try and familiarize myself with Java and learn how runlite plugins work.
+
+Adds a counter to the coal bag addon.
+
+## Description
+
+The plugin is simple, it adds a counter to the coal bag to tell you how much coal is in the coal bag. The counter only updates when you add coal manually into the bag. It will not update when coal is added while the bag is opened.
+
+This plugin was mostly copied from [Adam's esspouch](https://github.com/Adam-/runelite-plugins/blob/esspouch/src/main/java/info/sigterm/plugins/esspouch/EssPouchPlugin.java) plugin.
+## Help
+
+If you find a issue please open a issue on this repository with a description of what's happening and how to reproduce the issue.
+
+## Version History
+* 1.0
+    * Initial Release
