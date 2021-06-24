@@ -1,6 +1,6 @@
 # Coal Bag Plugin
 
-Adds a counter to the coal bag addon.
+Adds a counter to the coal bag.
 
 ## Description
 
@@ -12,5 +12,10 @@ This plugin was mostly copied from [Adam's esspouch](https://github.com/Adam-/ru
 If you find a issue please open a issue on this repository with a description of what's happening and how to reproduce the issue.
 
 ## Version History
+* 2.0
+  * Fix Issue #1
+    * Counter should account for Smithing Cape of Accomplishment.
+    * Counter now displays the correct amount of coal in bag when emptied.
+  * Changed name to "Coal Bag"
 * 1.0
     * Initial Release

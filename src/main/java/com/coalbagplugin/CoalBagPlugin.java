@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2019 Adam <Adam@sigterm.info>
+ * Copyright (c) 2021 Nick Wolff <nick@wolff.tech>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +32,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.events.ChatMessage;
+import net.runelite.api.events.GameTick;
 import net.runelite.api.events.MenuOptionClicked;
+import net.runelite.api.widgets.Widget;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -101,18 +104,31 @@ public class CoalBagPlugin extends Plugin
 	}
 
 	@Subscribe
+	public void onGameTick(GameTick tick)
+	{
+		Widget coalBagWidget = client.getWidget(12648450);
+
+		if (coalBagWidget != null)
+		{
+			String amount = coalBagWidget.getText();
+			if (amount.equals("The coal bag is now empty."))
+			{
+				CoalInBag.updateAmount(0);
+			}
+			else
+			{
+				amount = amount.replaceAll("[^0-9]", "");
+				CoalInBag.updateAmount(Integer.parseInt(amount));
+			}
+		}
+	}
+
+	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
-		switch (event.getMenuOption())
+		if ("Destroy".equals(event.getMenuOption()))
 		{
-			case "Empty":
-				CoalInBag.updateAmount(0);
-				break;
-			case "Destroy":
-				CoalInBag.updateAmount(-1);
-				break;
-			default:
-				break;
+			CoalInBag.updateAmount(-1);
 		}
 	}
 
