@@ -52,6 +52,7 @@ public class CoalBagPlugin extends Plugin
 	private static final Pattern BAG_EMPTY_MESSAGE = Pattern.compile("^The coal bag is empty\\.$");
 	private static final Pattern BAG_ONE_MESSAGE = Pattern.compile("^The coal bag contains one piece of coal\\.$");
 	private static final Pattern BAG_MANY_MESSAGE = Pattern.compile("^The coal bag contains ([\\d]+)? pieces? of coal\\.$");
+	private static final Pattern BAG_MANY_MESSAGE_WIDGET = Pattern.compile("^The coal bag still contains ([\\d]+)? pieces? of coal\\.");
 
 	@Inject
 	private Client client;
@@ -111,14 +112,23 @@ public class CoalBagPlugin extends Plugin
 		if (coalBagWidget != null)
 		{
 			String amount = coalBagWidget.getText();
-			if (amount.equals("The coal bag is now empty."))
+
+			Matcher matcher4 = BAG_MANY_MESSAGE_WIDGET.matcher(amount);
+			if (matcher4.matches())
 			{
-				CoalInBag.updateAmount(0);
+				final int num = Integer.parseInt(matcher4.group(1));
+				CoalInBag.updateAmount((num));
 			}
-			else
+
+			switch (amount)
 			{
-				amount = amount.replaceAll("[^0-9]", "");
-				CoalInBag.updateAmount(Integer.parseInt(amount));
+				case "The coal bag is empty.":
+					CoalInBag.updateAmount(0);
+					break;
+
+				case "The coal bag still contains one piece of coal.":
+					CoalInBag.updateAmount(1);
+					break;
 			}
 		}
 	}

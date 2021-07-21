@@ -12,7 +12,11 @@ This plugin was mostly copied from [Adam's esspouch](https://github.com/Adam-/ru
 If you find a issue please open a issue on this repository with a description of what's happening and how to reproduce the issue.
 
 ## Version History
-* 2.0
+* 1.2
+  * Fix Issue #2
+    * Game will no longer error when completing temple trekks or when recieving a new cluescroll step.
+  * Counter updates properly when one piece of coal is left in the bag when emptying.
+* 1.1
   * Fix Issue #1
     * Counter should account for Smithing Cape of Accomplishment.
     * Counter now displays the correct amount of coal in bag when emptied.
