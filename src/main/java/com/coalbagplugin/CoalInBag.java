@@ -43,4 +43,9 @@ public class CoalInBag
 	{
 		return storedAmount < 0;
 	}
+
+	public static boolean isEmpty()
+	{
+		return storedAmount == 0;
+	}
 }

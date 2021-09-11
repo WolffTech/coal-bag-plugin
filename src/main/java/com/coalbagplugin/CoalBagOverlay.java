@@ -58,16 +58,18 @@ public class CoalBagOverlay extends WidgetItemOverlay
 			final Rectangle bounds = itemWidget.getCanvasBounds();
 			final TextComponent textComponent = new TextComponent();
 			textComponent.setPosition(new Point(bounds.x - 1, bounds.y + 8));
-			textComponent.setColor(Color.CYAN);
 
-			if (CoalInBag.isUnknown())
-			{
+			if (CoalInBag.isUnknown()) {
+				textComponent.setColor(Color.GRAY);
 				textComponent.setText("?");
-			}
-			else
-			{
+			} else if (CoalInBag.isEmpty()) {
+				textComponent.setColor(Color.RED);
+				textComponent.setText("0");
+			} else {
+				textComponent.setColor(Color.CYAN);
 				textComponent.setText(CoalInBag.tellAmount());
 			}
+
 			textComponent.render(graphics);
 		}
 	}
