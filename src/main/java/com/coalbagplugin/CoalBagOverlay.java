@@ -77,7 +77,7 @@ public class CoalBagOverlay extends WidgetItemOverlay
 			else
 			{
 				textComponent.setColor(config.knownCoalBagColor());
-				textComponent.setText(CoalInBag.tellAmount());
+				textComponent.setText(CoalInBag.getAmount());
 			}
 
 			textComponent.render(graphics);

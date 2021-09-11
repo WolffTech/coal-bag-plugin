@@ -25,27 +25,70 @@
  */
 package com.coalbagplugin;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class CoalInBag
 {
+	private static final int UNKNOWN_AMOUNT = -1;
+	private static final int EMPTY_AMOUNT = 0;
+
+	private static final Pattern BAG_EMPTY_MESSAGE = Pattern.compile("^The coal bag is (?:now\\s)?empty\\.");
+	private static final Pattern BAG_ONE_OR_MANY_MESSAGE = Pattern.compile("^The coal bag (?:still\\s)?contains ([\\d]+|one) pieces? of coal\\.");
+
 	private static int storedAmount;
 
-	public static String tellAmount()
+	private static void setAmount(int amount)
+	{
+		storedAmount = amount;
+	}
+
+	private static void setEmptyAmount()
+	{
+		storedAmount = EMPTY_AMOUNT;
+	}
+
+	public static void setUnknownAmount()
+	{
+		storedAmount = UNKNOWN_AMOUNT;
+	}
+
+	public static String getAmount()
 	{
 		return String.valueOf(storedAmount);
 	}
 
-	public static void updateAmount(int stored)
+	public static void updateAmount(String message)
 	{
-		storedAmount = stored;
+		final Matcher emptyMatcher = BAG_EMPTY_MESSAGE.matcher(message);
+		if (emptyMatcher.matches())
+		{
+			setEmptyAmount();
+		}
+		else
+		{
+			final Matcher oneOrManyMatcher = BAG_ONE_OR_MANY_MESSAGE.matcher(message);
+			if (oneOrManyMatcher.matches())
+			{
+				// grabs the amount of coal in the bag from the message, turns it into an integer, and passes it into the coal bag amount
+				final String match = oneOrManyMatcher.group(1);
+				int num = 1;
+				if (!"one".equals(match))
+				{
+					num = Integer.parseInt(match);
+				}
+				setAmount(num);
+			}
+		}
 	}
 
 	public static boolean isUnknown()
 	{
-		return storedAmount < 0;
+		return storedAmount == UNKNOWN_AMOUNT;
 	}
 
 	public static boolean isEmpty()
 	{
-		return storedAmount == 0;
+		return storedAmount == EMPTY_AMOUNT;
 	}
 }
