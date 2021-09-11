@@ -25,9 +25,7 @@
  */
 package com.coalbagplugin;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.inject.Inject;
+import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
@@ -35,16 +33,21 @@ import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.widgets.Widget;
+import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 
+import javax.inject.Inject;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @Slf4j
 @PluginDescriptor(
-	name = "Coal Bag",
-	description = "Shows how much coal is in the coal bag.",
-	tags = {"coal", "bag"}
+		name = "Coal Bag",
+		description = "Shows how much coal is in the coal bag.",
+		tags = {"coal", "bag"}
 )
 public class CoalBagPlugin extends Plugin
 {
@@ -65,6 +68,12 @@ public class CoalBagPlugin extends Plugin
 	@Inject
 	private CoalBagOverlay coalBagOverlay;
 
+	@Provides
+	CoalBagConfig provideConfig(ConfigManager configManager)
+	{
+		return configManager.getConfig(CoalBagConfig.class);
+	}
+
 	@Override
 	protected void startUp()
 	{
@@ -80,9 +89,12 @@ public class CoalBagPlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onChatMessage(ChatMessage event) {
-        if (event.getType() == ChatMessageType.GAMEMESSAGE) {
-			switch (event.getMessage()) {
+	public void onChatMessage(ChatMessage event)
+	{
+		if (event.getType() == ChatMessageType.GAMEMESSAGE)
+		{
+			switch (event.getMessage())
+			{
 				case BAG_EMPTY_MESSAGE:
 				case BAG_EMPTY_MESSAGE_NOW:
 					CoalInBag.updateAmount(0);
@@ -92,13 +104,14 @@ public class CoalBagPlugin extends Plugin
 					break;
 				default:
 					Matcher matcher = BAG_MANY_MESSAGE.matcher(event.getMessage());
-					if (matcher.matches()) {
+					if (matcher.matches())
+					{
 						// grabs the amount of coal in the bag from the message, turns it into an integer, and passes it into the coal bag amount
 						final int num = Integer.parseInt(matcher.group(1));
 						CoalInBag.updateAmount((num));
 					}
 			}
-        }
+		}
 	}
 
 	@Subscribe
@@ -106,10 +119,12 @@ public class CoalBagPlugin extends Plugin
 	{
 		// because the coal bag sometimes displays the emptied amount message as a widget, we need to check for that here
 		Widget coalBagWidget = client.getWidget(12648450);
+
 		if (coalBagWidget != null)
 		{
 			String widgetText = coalBagWidget.getText();
-			switch (widgetText) {
+			switch (widgetText)
+			{
 				case BAG_EMPTY_MESSAGE:
 				case BAG_EMPTY_MESSAGE_NOW:
 					CoalInBag.updateAmount(0);
@@ -121,7 +136,8 @@ public class CoalBagPlugin extends Plugin
 				default:
 					// the widget id is shared with other widgets, so we need to check to see if the text is for the coal bag or not
 					Matcher matcher = BAG_MANY_MESSAGE_WIDGET.matcher(widgetText);
-					if (matcher.matches()) {
+					if (matcher.matches())
+					{
 						final int num = Integer.parseInt(matcher.group(1));
 						CoalInBag.updateAmount((num));
 					}

@@ -26,28 +26,33 @@
 package com.coalbagplugin;
 
 import com.google.common.collect.ImmutableList;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.util.Collection;
-import javax.inject.Inject;
 import net.runelite.api.ItemID;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.ui.overlay.WidgetItemOverlay;
 import net.runelite.client.ui.overlay.components.TextComponent;
 
+import javax.inject.Inject;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.Point;
+import java.util.Collection;
+
 public class CoalBagOverlay extends WidgetItemOverlay
 {
+	private final CoalBagConfig config;
 	private static final Collection<Integer> COAL_BAG_IDS = ImmutableList.of(
-		ItemID.OPEN_COAL_BAG,
-		ItemID.COAL_BAG,
-		ItemID.COAL_BAG_12019,
-		ItemID.COAL_BAG_25627
+			ItemID.OPEN_COAL_BAG,
+			ItemID.COAL_BAG,
+			ItemID.COAL_BAG_12019,
+			ItemID.COAL_BAG_25627
 	);
 
 	@Inject
-	CoalBagOverlay() { showOnInventory(); }
+	private CoalBagOverlay(CoalBagConfig config)
+	{
+		this.config = config;
+		showOnInventory();
+	}
 
 	@Override
 	public void renderItemOverlay(Graphics2D graphics, int itemId, WidgetItem itemWidget)
@@ -59,14 +64,19 @@ public class CoalBagOverlay extends WidgetItemOverlay
 			final TextComponent textComponent = new TextComponent();
 			textComponent.setPosition(new Point(bounds.x - 1, bounds.y + 8));
 
-			if (CoalInBag.isUnknown()) {
-				textComponent.setColor(Color.GRAY);
+			if (CoalInBag.isUnknown())
+			{
+				textComponent.setColor(config.unknownCoalBagColor());
 				textComponent.setText("?");
-			} else if (CoalInBag.isEmpty()) {
-				textComponent.setColor(Color.RED);
+			}
+			else if (CoalInBag.isEmpty())
+			{
+				textComponent.setColor(config.emptyCoalBagColor());
 				textComponent.setText("0");
-			} else {
-				textComponent.setColor(Color.CYAN);
+			}
+			else
+			{
+				textComponent.setColor(config.knownCoalBagColor());
 				textComponent.setText(CoalInBag.tellAmount());
 			}
 
