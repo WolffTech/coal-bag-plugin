@@ -40,10 +40,10 @@ import net.runelite.client.ui.overlay.components.TextComponent;
 public class CoalBagOverlay extends WidgetItemOverlay
 {
 	private static final Collection<Integer> COAL_BAG_IDS = ImmutableList.of(
-			ItemID.OPEN_COAL_BAG,
-			ItemID.COAL_BAG,
-			ItemID.COAL_BAG_12019,
-			ItemID.COAL_BAG_25627
+		ItemID.OPEN_COAL_BAG,
+		ItemID.COAL_BAG,
+		ItemID.COAL_BAG_12019,
+		ItemID.COAL_BAG_25627
 	);
 
 	@Inject
