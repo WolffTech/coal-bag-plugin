@@ -25,10 +25,12 @@
  */
 package com.coalbagplugin;
 
+import com.google.common.collect.ImmutableList;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.Collection;
 import javax.inject.Inject;
 import net.runelite.api.ItemID;
 import net.runelite.api.widgets.WidgetItem;
@@ -37,13 +39,21 @@ import net.runelite.client.ui.overlay.components.TextComponent;
 
 public class CoalBagOverlay extends WidgetItemOverlay
 {
+	private static final Collection<Integer> COAL_BAG_IDS = ImmutableList.of(
+			ItemID.OPEN_COAL_BAG,
+			ItemID.COAL_BAG,
+			ItemID.COAL_BAG_12019,
+			ItemID.COAL_BAG_25627
+	);
+
 	@Inject
 	CoalBagOverlay() { showOnInventory(); }
 
 	@Override
 	public void renderItemOverlay(Graphics2D graphics, int itemId, WidgetItem itemWidget)
 	{
-		if (itemId == ItemID.COAL_BAG_12019 || itemId == ItemID.COAL_BAG)
+
+		if (COAL_BAG_IDS.contains(itemId))
 		{
 			final Rectangle bounds = itemWidget.getCanvasBounds();
 			final TextComponent textComponent = new TextComponent();
