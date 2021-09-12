@@ -70,14 +70,13 @@ public class CoalBag
 			final Matcher oneOrManyMatcher = BAG_ONE_OR_MANY_MESSAGE.matcher(message);
 			if (oneOrManyMatcher.matches())
 			{
-				// grabs the amount of coal in the bag from the message, turns it into an integer, and passes it into the coal bag amount
 				final String match = oneOrManyMatcher.group(1);
-				int num = 1;
-				if (!"one".equals(match))
+				if (match.equals("one"))
 				{
-					num = Integer.parseInt(match);
+					setAmount(1);
+				} else {
+					setAmount(Integer.parseInt(match));
 				}
-				setAmount(num);
 			}
 		}
 	}
