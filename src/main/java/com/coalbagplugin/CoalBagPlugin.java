@@ -69,7 +69,7 @@ public class CoalBagPlugin extends Plugin
 	protected void startUp()
 	{
 		overlayManager.add(coalBagOverlay);
-		CoalInBag.setUnknownAmount();
+		CoalBag.setUnknownAmount();
 	}
 
 	@Override
@@ -83,7 +83,7 @@ public class CoalBagPlugin extends Plugin
 	{
 		if (event.getType() == ChatMessageType.GAMEMESSAGE)
 		{
-			CoalInBag.updateAmount(event.getMessage());
+			CoalBag.updateAmount(event.getMessage());
 		}
 	}
 
@@ -94,7 +94,7 @@ public class CoalBagPlugin extends Plugin
 		Widget coalBagWidget = client.getWidget(12648450);
 		if (coalBagWidget != null)
 		{
-			CoalInBag.updateAmount(coalBagWidget.getText());
+			CoalBag.updateAmount(coalBagWidget.getText());
 		}
 	}
 
@@ -103,7 +103,7 @@ public class CoalBagPlugin extends Plugin
 	{
 		if ("Destroy".equals(event.getMenuOption()))
 		{
-			CoalInBag.setUnknownAmount();
+			CoalBag.setUnknownAmount();
 		}
 	}
 }

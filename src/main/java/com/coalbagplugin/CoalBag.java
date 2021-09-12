@@ -28,7 +28,7 @@ package com.coalbagplugin;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class CoalInBag
+public class CoalBag
 {
 	private static final int UNKNOWN_AMOUNT = -1;
 	private static final int EMPTY_AMOUNT = 0;

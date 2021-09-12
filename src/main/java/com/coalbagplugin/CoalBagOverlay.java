@@ -64,12 +64,12 @@ public class CoalBagOverlay extends WidgetItemOverlay
 			final TextComponent textComponent = new TextComponent();
 			textComponent.setPosition(new Point(bounds.x - 1, bounds.y + 8));
 
-			if (CoalInBag.isUnknown())
+			if (CoalBag.isUnknown())
 			{
 				textComponent.setColor(config.unknownCoalBagColor());
 				textComponent.setText("?");
 			}
-			else if (CoalInBag.isEmpty())
+			else if (CoalBag.isEmpty())
 			{
 				textComponent.setColor(config.emptyCoalBagColor());
 				textComponent.setText("0");
@@ -77,7 +77,7 @@ public class CoalBagOverlay extends WidgetItemOverlay
 			else
 			{
 				textComponent.setColor(config.knownCoalBagColor());
-				textComponent.setText(CoalInBag.getAmount());
+				textComponent.setText(CoalBag.getAmount());
 			}
 
 			textComponent.render(graphics);
