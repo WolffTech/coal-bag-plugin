@@ -25,9 +25,7 @@
  */
 package com.coalbagplugin;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.inject.Inject;
+import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
@@ -35,24 +33,22 @@ import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.widgets.Widget;
+import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 
+import javax.inject.Inject;
+
 @Slf4j
 @PluginDescriptor(
-	name = "Coal Bag",
-	description = "Shows how much coal is in the coal bag.",
-	tags = {"coal", "bag"}
+		name = "Coal Bag",
+		description = "Shows how much coal is in the coal bag.",
+		tags = {"coal", "bag"}
 )
 public class CoalBagPlugin extends Plugin
 {
-	private static final String BAG_EMPTY_MESSAGE = "The coal bag is now empty.";
-	private static final String BAG_ONE_MESSAGE = "The coal bag contains one piece of coal.";
-	// this regex is used to match coal bag messages and extract the amount of coal from the message
-	private static final Pattern BAG_MANY_MESSAGE = Pattern.compile("^The coal bag contains ([\\d]+)? pieces? of coal\\.$");
-	private static final Pattern BAG_MANY_MESSAGE_WIDGET = Pattern.compile("^The coal bag still contains ([\\d]+)? pieces? of coal\\.");
 
 	@Inject
 	private Client client;
@@ -63,12 +59,17 @@ public class CoalBagPlugin extends Plugin
 	@Inject
 	private CoalBagOverlay coalBagOverlay;
 
+	@Provides
+	CoalBagConfig provideConfig(ConfigManager configManager)
+	{
+		return configManager.getConfig(CoalBagConfig.class);
+	}
+
 	@Override
 	protected void startUp()
 	{
 		overlayManager.add(coalBagOverlay);
-		// sets the coal bag overlay to unknown
-		CoalInBag.updateAmount(-1);
+		CoalBag.setUnknownAmount();
 	}
 
 	@Override
@@ -80,60 +81,20 @@ public class CoalBagPlugin extends Plugin
 	@Subscribe
 	public void onChatMessage(ChatMessage event)
 	{
-		if (event.getType() != ChatMessageType.GAMEMESSAGE)
+		if (event.getType() == ChatMessageType.GAMEMESSAGE)
 		{
-			return;
-		}
-
-		if (event.getMessage().equals(BAG_ONE_MESSAGE))
-		{
-			CoalInBag.updateAmount(1);
-		}
-
-		if (event.getMessage().equals(BAG_EMPTY_MESSAGE))
-		{
-			CoalInBag.updateAmount(0);
-		}
-
-		Matcher matcher = BAG_MANY_MESSAGE.matcher(event.getMessage());
-		if (matcher.matches())
-		{
-			// grabs the amount of coal in the bag from the message, turns it into a integer, and passes it into the coal bag amount
-			final int num = Integer.parseInt(matcher.group(1));
-			CoalInBag.updateAmount((num));
+			CoalBag.updateAmount(event.getMessage());
 		}
 	}
 
 	@Subscribe
 	public void onGameTick(GameTick tick)
 	{
-		// because the coal bag sometimes displays the emptied amount messsage as a widget, we need to check for that here
+		// because the coal bag sometimes displays the emptied amount message as a widget, we need to check for that here
 		Widget coalBagWidget = client.getWidget(12648450);
-
 		if (coalBagWidget != null)
 		{
-			String amount = coalBagWidget.getText();
-
-			// the widget id is shared with other widgets, so we need to check to see if the text is for the coal bag or not
-			Matcher matcher = BAG_MANY_MESSAGE_WIDGET.matcher(amount);
-			if (matcher.matches())
-			{
-				final int num = Integer.parseInt(matcher.group(1));
-				CoalInBag.updateAmount((num));
-			}
-
-			switch (amount)
-			{
-				case BAG_EMPTY_MESSAGE:
-					CoalInBag.updateAmount(0);
-					break;
-				// the message for "one piece of coal remaining" in the widget is different than what is displayed in the chat
-				case "The coal bag still contains one piece of coal.":
-					CoalInBag.updateAmount(1);
-					break;
-				default:
-					break;
-			}
+			CoalBag.updateAmount(coalBagWidget.getText());
 		}
 	}
 
@@ -142,7 +103,7 @@ public class CoalBagPlugin extends Plugin
 	{
 		if ("Destroy".equals(event.getMenuOption()))
 		{
-			CoalInBag.updateAmount(-1);
+			CoalBag.setUnknownAmount();
 		}
 	}
 }
