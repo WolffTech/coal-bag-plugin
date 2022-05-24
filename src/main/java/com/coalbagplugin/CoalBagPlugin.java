@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.events.ChatMessage;
-import net.runelite.api.events.GameTick;
+import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.config.ConfigManager;
@@ -88,9 +88,10 @@ public class CoalBagPlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onGameTick(GameTick tick)
+	public void onClientTick(ClientTick clientTick)
 	{
-		// because the coal bag sometimes displays the emptied amount message as a widget, we need to check for that here
+		// running this under onClientTick as it is possible to close the widget on the same tick that it opens.
+		// because the coal bag sometimes displays the emptied amount message as a widget, we need to check for that here.
 		Widget coalBagWidget = client.getWidget(12648450);
 		if (coalBagWidget != null)
 		{
