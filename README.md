@@ -12,11 +12,10 @@ This plugin is a modified version of [Adam's esspouch](https://github.com/Adam-/
 
 If you find a issue please [open a issue](https://github.com/WolffTech/coal-bag-plugin/issues/new) on this repository with a description of what's happening and how to reproduce the issue.
 
-## Known Issues
-
-- There's a possibility to close the Widget dialog on the same tick as it opens, causing the counter not to update.
-
 ## Version History
+* 1.5
+  * Fix Issue #4
+    * Check for the widget on `onClientTick` instead of `onGameTick` as it's possible to close the widget on the same game tick that it opens.
 * 1.4 (Thank you to [keyosk](https://github.com/keyosk) for this update!)
   * Added a configurable color for the counter
   * Both chat messages and widget messages are now evaluated as they can be different.
