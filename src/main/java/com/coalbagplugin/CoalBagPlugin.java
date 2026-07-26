@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2019 Adam <Adam@sigterm.info>
  * Copyright (c) 2021 Nick Wolff <nick@wolff.tech>
+ * Copyright (c) 2022 TicTac7x
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +30,9 @@ import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
+import net.runelite.api.InventoryID;
+import net.runelite.api.ItemContainer;
+import net.runelite.api.ItemID;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.MenuOptionClicked;
@@ -40,6 +44,7 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 
 import javax.inject.Inject;
+import java.util.regex.Pattern;
 
 @Slf4j
 @PluginDescriptor(
@@ -49,6 +54,18 @@ import javax.inject.Inject;
 )
 public class CoalBagPlugin extends Plugin
 {
+	private static final int COAL_BAG_CAPACITY = 27;
+	private static final int SMITHING_CAPE_COAL_BAG_CAPACITY = 36;
+
+	private static final String EMPTY_ALL_CONTAINERS_MESSAGE = "You empty all of your containers into the bank.";
+	private static final String MINE_OPTION = "Mine";
+	private static final String COAL_ROCKS_TARGET = "Coal rocks";
+	private static final String COAL_MINED_MESSAGE = "You manage to mine some coal.";
+
+	private static final Pattern COLOUR_TAG_PATTERN = Pattern.compile("</?col(?:=[^>]*)?>");
+	private static final Pattern BONUS_ORE_MESSAGE = Pattern.compile(
+			"^(?:Your Celestial ring allows you to mine an additional ore\\.|The Varrock platebody enabled you to mine an additional ore\\.)$"
+	);
 
 	@Inject
 	private Client client;
@@ -58,6 +75,8 @@ public class CoalBagPlugin extends Plugin
 
 	@Inject
 	private CoalBagOverlay coalBagOverlay;
+
+	private boolean miningCoal;
 
 	@Provides
 	CoalBagConfig provideConfig(ConfigManager configManager)
@@ -70,20 +89,38 @@ public class CoalBagPlugin extends Plugin
 	{
 		overlayManager.add(coalBagOverlay);
 		CoalBag.setUnknownAmount();
+		miningCoal = false;
 	}
 
 	@Override
 	protected void shutDown()
 	{
 		overlayManager.remove(coalBagOverlay);
+		miningCoal = false;
 	}
 
 	@Subscribe
 	public void onChatMessage(ChatMessage event)
 	{
-		if (event.getType() == ChatMessageType.GAMEMESSAGE)
+		if (!isTrackedChatMessageType(event.getType()))
 		{
-			CoalBag.updateAmount(event.getMessage());
+			return;
+		}
+
+		String message = cleanText(event.getMessage());
+		if (!EMPTY_ALL_CONTAINERS_MESSAGE.equals(message) || hasCoalBag())
+		{
+			CoalBag.updateAmount(message);
+		}
+
+		if (hasOpenCoalBag() && COAL_MINED_MESSAGE.equals(message))
+		{
+			CoalBag.addAmount(1, getCoalBagCapacity());
+			miningCoal = true;
+		}
+		else if (miningCoal && hasOpenCoalBag() && BONUS_ORE_MESSAGE.matcher(message).matches())
+		{
+			CoalBag.addAmount(1, getCoalBagCapacity());
 		}
 	}
 
@@ -95,16 +132,64 @@ public class CoalBagPlugin extends Plugin
 		Widget coalBagWidget = client.getWidget(12648450);
 		if (coalBagWidget != null)
 		{
-			CoalBag.updateAmount(coalBagWidget.getText());
+			CoalBag.updateAmount(cleanText(coalBagWidget.getText()));
 		}
 	}
 
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
-		if ("Destroy".equals(event.getMenuOption()))
+		String option = cleanText(event.getMenuOption());
+		String target = cleanText(event.getMenuTarget());
+
+		miningCoal = MINE_OPTION.equals(option) && target.contains(COAL_ROCKS_TARGET);
+
+		if ("Destroy".equals(option) && target.toLowerCase().contains("coal bag"))
 		{
 			CoalBag.setUnknownAmount();
 		}
+	}
+
+	private static boolean isTrackedChatMessageType(ChatMessageType type)
+	{
+		return type == ChatMessageType.GAMEMESSAGE
+				|| type == ChatMessageType.SPAM;
+	}
+
+	private static String cleanText(String text)
+	{
+		if (text == null)
+		{
+			return "";
+		}
+
+		return COLOUR_TAG_PATTERN.matcher(text)
+				.replaceAll("")
+				.replace("<br>", " ")
+				.replace('\u00A0', ' ')
+				.trim();
+	}
+
+	private boolean hasCoalBag()
+	{
+		ItemContainer inventory = client.getItemContainer(InventoryID.INVENTORY);
+		return inventory != null
+				&& (inventory.contains(ItemID.COAL_BAG_12019) || inventory.contains(ItemID.OPEN_COAL_BAG));
+	}
+
+	private boolean hasOpenCoalBag()
+	{
+		ItemContainer inventory = client.getItemContainer(InventoryID.INVENTORY);
+		return inventory != null && inventory.contains(ItemID.OPEN_COAL_BAG);
+	}
+
+	private int getCoalBagCapacity()
+	{
+		ItemContainer equipment = client.getItemContainer(InventoryID.EQUIPMENT);
+		boolean smithingCapeEquipped = equipment != null
+				&& (equipment.contains(ItemID.SMITHING_CAPE)
+				|| equipment.contains(ItemID.SMITHING_CAPET)
+				|| equipment.contains(ItemID.MAX_CAPE));
+		return smithingCapeEquipped ? SMITHING_CAPE_COAL_BAG_CAPACITY : COAL_BAG_CAPACITY;
 	}
 }

@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2019 Adam <Adam@sigterm.info>
  * Copyright (c) 2021 Nick Wolff <nick@wolff.tech>
+ * Copyright (c) 2022 TicTac7x
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +36,7 @@ public class CoalBag
 
 	private static final Pattern BAG_EMPTY_MESSAGE = Pattern.compile("^The coal bag is (?:now\\s)?empty\\.");
 	private static final Pattern BAG_ONE_OR_MANY_MESSAGE = Pattern.compile("^The coal bag (?:still\\s)?contains ([\\d]+|one) pieces? of coal\\.");
+	private static final String EMPTY_ALL_CONTAINERS_MESSAGE = "You empty all of your containers into the bank.";
 
 	private static int storedAmount;
 
@@ -53,6 +55,18 @@ public class CoalBag
 		storedAmount = UNKNOWN_AMOUNT;
 	}
 
+	public static void addAmount(int amount, int maximumAmount)
+	{
+		if (isUnknown() || amount <= 0)
+		{
+			return;
+		}
+
+		final long increasedAmount = (long) storedAmount + amount;
+		final int clampedAmount = (int) Math.min(increasedAmount, (long) maximumAmount);
+		setAmount(Math.max(storedAmount, clampedAmount));
+	}
+
 	public static String getAmount()
 	{
 		return String.valueOf(storedAmount);
@@ -60,6 +74,12 @@ public class CoalBag
 
 	public static void updateAmount(String message)
 	{
+		if (EMPTY_ALL_CONTAINERS_MESSAGE.equals(message))
+		{
+			setEmptyAmount();
+			return;
+		}
+
 		final Matcher emptyMatcher = BAG_EMPTY_MESSAGE.matcher(message);
 		if (emptyMatcher.matches())
 		{

@@ -2,6 +2,14 @@
 
 All notable changes to Coal Bag are documented in this file.
 
+## 1.6 - 2026-07-25
+
+### Added
+
+- Track coal mined directly into an open bag, eligible bonus ore, and bank container-emptying.
+
+Thanks to [nanopink](https://github.com/nanopink) for contributing this release.
+
 ## 1.5 - 2022-05-24
 
 ### Fixed

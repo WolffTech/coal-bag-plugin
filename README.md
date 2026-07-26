@@ -7,13 +7,14 @@ Coal Bag displays the amount of coal in your coal bag directly in your inventory
 - Displays the known coal amount on the coal bag.
 - Shows `0` when the bag is known to be empty.
 - Shows `?` when the amount is unknown.
+- Tracks coal mined directly into an open bag, including eligible bonus ore.
 - Provides configurable colors for known, empty, and unknown amounts.
 
 ## How It Works
 
-The counter updates when the game reports the coal bag's contents, such as when you check, fill, or empty the bag. The amount starts as unknown each time the plugin is enabled and remains unknown until the game reports the bag's contents.
+The counter updates when the game reports the coal bag's contents, such as when you check, fill, or empty the bag. Once known, the counter also follows coal mined directly into an open bag, bonus ore from the Celestial ring and Varrock platebody, and bank container-emptying.
 
-Coal added automatically while mining with an open coal bag is not currently tracked. Check the bag to update the counter after mining this way.
+Coal picked up from the ground directly into an open bag cannot be tracked reliably because the game does not expose a safe event for that action.
 
 ## Configuration
 
@@ -37,6 +38,8 @@ If you encounter a problem, [open an issue](https://github.com/WolffTech/coal-ba
 ## Credits
 
 Coal Bag is based on Adam's [Essence Pouch plugin](https://github.com/Adam-/runelite-plugins/blob/esspouch/src/main/java/info/sigterm/plugins/esspouch/EssPouchPlugin.java).
+
+Automatic update handling is adapted from [Item Charges Improved](https://github.com/TicTac7x/runelite-plugins/tree/plugin-charges).
 
 ## Project Information
 
