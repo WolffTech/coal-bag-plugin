@@ -8,59 +8,72 @@ import static org.junit.Assert.assertTrue;
 
 public class CoalBagTest
 {
+	private CoalBag coalBag;
+
 	@Before
 	public void setUp()
 	{
-		CoalBag.setUnknownAmount();
+		coalBag = new CoalBag();
 	}
 
 	@Test
 	public void updateAmountParsesCoalBagMessages()
 	{
-		CoalBag.updateAmount("The coal bag is empty.");
-		assertTrue(CoalBag.isEmpty());
+		coalBag.updateAmount("The coal bag is empty.");
+		assertTrue(coalBag.isEmpty());
 
-		CoalBag.updateAmount("The coal bag is now empty.");
-		assertTrue(CoalBag.isEmpty());
+		coalBag.updateAmount("The coal bag is now empty.");
+		assertTrue(coalBag.isEmpty());
 
-		CoalBag.updateAmount("The coal bag contains one piece of coal.");
-		assertEquals("1", CoalBag.getAmount());
+		coalBag.updateAmount("The coal bag contains one piece of coal.");
+		assertEquals("1", coalBag.getAmount());
 
-		CoalBag.updateAmount("The coal bag still contains one piece of coal.");
-		assertEquals("1", CoalBag.getAmount());
+		coalBag.updateAmount("The coal bag still contains one piece of coal.");
+		assertEquals("1", coalBag.getAmount());
 
-		CoalBag.updateAmount("The coal bag contains 27 pieces of coal.");
-		assertEquals("27", CoalBag.getAmount());
+		coalBag.updateAmount("The coal bag contains 27 pieces of coal.");
+		assertEquals("27", coalBag.getAmount());
 	}
 
 	@Test
 	public void updateAmountParsesExactEmptyAllContainersMessage()
 	{
-		CoalBag.updateAmount("The coal bag contains 10 pieces of coal.");
-		CoalBag.updateAmount("You empty all of your containers into the bank.");
-		assertTrue(CoalBag.isEmpty());
+		coalBag.updateAmount("The coal bag contains 10 pieces of coal.");
+		coalBag.updateAmount("You empty all of your containers into the bank.");
+		assertTrue(coalBag.isEmpty());
 
-		CoalBag.updateAmount("The coal bag contains 10 pieces of coal.");
-		CoalBag.updateAmount("You empty all of your containers into the bank. Extra text");
-		assertEquals("10", CoalBag.getAmount());
+		coalBag.updateAmount("The coal bag contains 10 pieces of coal.");
+		coalBag.updateAmount("You empty all of your containers into the bank. Extra text");
+		assertEquals("10", coalBag.getAmount());
 	}
 
 	@Test
 	public void addAmountPreservesUnknownAndClampsWithoutReducing()
 	{
-		CoalBag.addAmount(1, 27);
-		assertTrue(CoalBag.isUnknown());
+		coalBag.addAmount(1, 27);
+		assertTrue(coalBag.isUnknown());
 
-		CoalBag.updateAmount("The coal bag contains 20 pieces of coal.");
-		CoalBag.addAmount(10, 27);
-		assertEquals("27", CoalBag.getAmount());
+		coalBag.updateAmount("The coal bag contains 20 pieces of coal.");
+		coalBag.addAmount(10, 27);
+		assertEquals("27", coalBag.getAmount());
 
-		CoalBag.updateAmount("The coal bag contains 30 pieces of coal.");
-		CoalBag.addAmount(1, 27);
-		assertEquals("30", CoalBag.getAmount());
+		coalBag.updateAmount("The coal bag contains 30 pieces of coal.");
+		coalBag.addAmount(1, 27);
+		assertEquals("30", coalBag.getAmount());
 
-		CoalBag.addAmount(-1, 27);
-		assertEquals("30", CoalBag.getAmount());
+		coalBag.addAmount(-1, 27);
+		assertEquals("30", coalBag.getAmount());
+	}
+
+	@Test
+	public void instancesDoNotShareAmounts()
+	{
+		CoalBag otherCoalBag = new CoalBag();
+
+		coalBag.updateAmount("The coal bag contains 10 pieces of coal.");
+
+		assertEquals("10", coalBag.getAmount());
+		assertTrue(otherCoalBag.isUnknown());
 	}
 
 }
