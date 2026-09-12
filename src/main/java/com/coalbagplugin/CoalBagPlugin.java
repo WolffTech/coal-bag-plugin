@@ -30,18 +30,23 @@ import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
-import net.runelite.api.InventoryID;
+import net.runelite.api.GameState;
 import net.runelite.api.ItemContainer;
-import net.runelite.api.ItemID;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.ClientTick;
+import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.MenuOptionClicked;
+import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.gameval.InventoryID;
+import net.runelite.api.gameval.ItemID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.util.Text;
 
 import javax.inject.Inject;
 import java.util.regex.Pattern;
@@ -62,7 +67,6 @@ public class CoalBagPlugin extends Plugin
 	private static final String COAL_ROCKS_TARGET = "Coal rocks";
 	private static final String COAL_MINED_MESSAGE = "You manage to mine some coal.";
 
-	private static final Pattern COLOUR_TAG_PATTERN = Pattern.compile("</?col(?:=[^>]*)?>");
 	private static final Pattern BONUS_ORE_MESSAGE = Pattern.compile(
 			"^(?:Your Celestial ring allows you to mine an additional ore\\.|The Varrock platebody enabled you to mine an additional ore\\.)$"
 	);
@@ -76,6 +80,9 @@ public class CoalBagPlugin extends Plugin
 	@Inject
 	private CoalBagOverlay coalBagOverlay;
 
+	@Inject
+	private CoalBag coalBag;
+
 	private boolean miningCoal;
 
 	@Provides
@@ -88,15 +95,33 @@ public class CoalBagPlugin extends Plugin
 	protected void startUp()
 	{
 		overlayManager.add(coalBagOverlay);
-		CoalBag.setUnknownAmount();
-		miningCoal = false;
+		resetTracking();
 	}
 
 	@Override
 	protected void shutDown()
 	{
 		overlayManager.remove(coalBagOverlay);
-		miningCoal = false;
+		resetTracking();
+	}
+
+	@Subscribe
+	public void onGameStateChanged(GameStateChanged event)
+	{
+		if (event.getGameState() == GameState.LOGGING_IN
+				|| event.getGameState() == GameState.LOGIN_SCREEN)
+		{
+			resetTracking();
+		}
+	}
+
+	@Subscribe
+	public void onItemContainerChanged(ItemContainerChanged event)
+	{
+		if (event.getContainerId() == InventoryID.INV && !hasCoalBag(event.getItemContainer()))
+		{
+			resetTracking();
+		}
 	}
 
 	@Subscribe
@@ -110,17 +135,17 @@ public class CoalBagPlugin extends Plugin
 		String message = cleanText(event.getMessage());
 		if (!EMPTY_ALL_CONTAINERS_MESSAGE.equals(message) || hasCoalBag())
 		{
-			CoalBag.updateAmount(message);
+			coalBag.updateAmount(message);
 		}
 
 		if (hasOpenCoalBag() && COAL_MINED_MESSAGE.equals(message))
 		{
-			CoalBag.addAmount(1, getCoalBagCapacity());
+			coalBag.addAmount(1, getCoalBagCapacity());
 			miningCoal = true;
 		}
 		else if (miningCoal && hasOpenCoalBag() && BONUS_ORE_MESSAGE.matcher(message).matches())
 		{
-			CoalBag.addAmount(1, getCoalBagCapacity());
+			coalBag.addAmount(1, getCoalBagCapacity());
 		}
 	}
 
@@ -129,10 +154,10 @@ public class CoalBagPlugin extends Plugin
 	{
 		// running this under onClientTick as it is possible to close the widget on the same tick that it opens.
 		// because the coal bag sometimes displays the emptied amount message as a widget, we need to check for that here.
-		Widget coalBagWidget = client.getWidget(12648450);
+		Widget coalBagWidget = client.getWidget(InterfaceID.Objectbox.TEXT);
 		if (coalBagWidget != null)
 		{
-			CoalBag.updateAmount(cleanText(coalBagWidget.getText()));
+			coalBag.updateAmount(cleanText(coalBagWidget.getText()));
 		}
 	}
 
@@ -143,11 +168,6 @@ public class CoalBagPlugin extends Plugin
 		String target = cleanText(event.getMenuTarget());
 
 		miningCoal = MINE_OPTION.equals(option) && target.contains(COAL_ROCKS_TARGET);
-
-		if ("Destroy".equals(option) && target.toLowerCase().contains("coal bag"))
-		{
-			CoalBag.setUnknownAmount();
-		}
 	}
 
 	private static boolean isTrackedChatMessageType(ChatMessageType type)
@@ -163,33 +183,42 @@ public class CoalBagPlugin extends Plugin
 			return "";
 		}
 
-		return COLOUR_TAG_PATTERN.matcher(text)
-				.replaceAll("")
-				.replace("<br>", " ")
+		return Text.removeTags(text.replace("<br>", " "))
 				.replace('\u00A0', ' ')
 				.trim();
 	}
 
 	private boolean hasCoalBag()
 	{
-		ItemContainer inventory = client.getItemContainer(InventoryID.INVENTORY);
+		return hasCoalBag(client.getItemContainer(InventoryID.INV));
+	}
+
+	private static boolean hasCoalBag(ItemContainer inventory)
+	{
 		return inventory != null
-				&& (inventory.contains(ItemID.COAL_BAG_12019) || inventory.contains(ItemID.OPEN_COAL_BAG));
+				&& (inventory.contains(ItemID.COAL_BAG) || inventory.contains(ItemID.COAL_BAG_OPEN));
 	}
 
 	private boolean hasOpenCoalBag()
 	{
-		ItemContainer inventory = client.getItemContainer(InventoryID.INVENTORY);
-		return inventory != null && inventory.contains(ItemID.OPEN_COAL_BAG);
+		ItemContainer inventory = client.getItemContainer(InventoryID.INV);
+		return inventory != null && inventory.contains(ItemID.COAL_BAG_OPEN);
 	}
 
 	private int getCoalBagCapacity()
 	{
-		ItemContainer equipment = client.getItemContainer(InventoryID.EQUIPMENT);
+		ItemContainer equipment = client.getItemContainer(InventoryID.WORN);
 		boolean smithingCapeEquipped = equipment != null
-				&& (equipment.contains(ItemID.SMITHING_CAPE)
-				|| equipment.contains(ItemID.SMITHING_CAPET)
-				|| equipment.contains(ItemID.MAX_CAPE));
+				&& (equipment.contains(ItemID.SKILLCAPE_SMITHING)
+				|| equipment.contains(ItemID.SKILLCAPE_SMITHING_TRIMMED)
+				|| equipment.contains(ItemID.SKILLCAPE_MAX)
+				|| equipment.contains(ItemID.SKILLCAPE_MAX_WORN));
 		return smithingCapeEquipped ? SMITHING_CAPE_COAL_BAG_CAPACITY : COAL_BAG_CAPACITY;
+	}
+
+	private void resetTracking()
+	{
+		coalBag.setUnknownAmount();
+		miningCoal = false;
 	}
 }

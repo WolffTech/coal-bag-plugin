@@ -28,7 +28,9 @@ package com.coalbagplugin;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.inject.Singleton;
 
+@Singleton
 public class CoalBag
 {
 	private static final int UNKNOWN_AMOUNT = -1;
@@ -38,24 +40,24 @@ public class CoalBag
 	private static final Pattern BAG_ONE_OR_MANY_MESSAGE = Pattern.compile("^The coal bag (?:still\\s)?contains ([\\d]+|one) pieces? of coal\\.");
 	private static final String EMPTY_ALL_CONTAINERS_MESSAGE = "You empty all of your containers into the bank.";
 
-	private static int storedAmount;
+	private int storedAmount = UNKNOWN_AMOUNT;
 
-	private static void setAmount(int amount)
+	private void setAmount(int amount)
 	{
 		storedAmount = amount;
 	}
 
-	private static void setEmptyAmount()
+	private void setEmptyAmount()
 	{
 		storedAmount = EMPTY_AMOUNT;
 	}
 
-	public static void setUnknownAmount()
+	public void setUnknownAmount()
 	{
 		storedAmount = UNKNOWN_AMOUNT;
 	}
 
-	public static void addAmount(int amount, int maximumAmount)
+	public void addAmount(int amount, int maximumAmount)
 	{
 		if (isUnknown() || amount <= 0)
 		{
@@ -67,12 +69,12 @@ public class CoalBag
 		setAmount(Math.max(storedAmount, clampedAmount));
 	}
 
-	public static String getAmount()
+	public String getAmount()
 	{
 		return String.valueOf(storedAmount);
 	}
 
-	public static void updateAmount(String message)
+	public void updateAmount(String message)
 	{
 		if (EMPTY_ALL_CONTAINERS_MESSAGE.equals(message))
 		{
@@ -101,12 +103,12 @@ public class CoalBag
 		}
 	}
 
-	public static boolean isUnknown()
+	public boolean isUnknown()
 	{
 		return storedAmount == UNKNOWN_AMOUNT;
 	}
 
-	public static boolean isEmpty()
+	public boolean isEmpty()
 	{
 		return storedAmount == EMPTY_AMOUNT;
 	}

@@ -25,8 +25,7 @@
  */
 package com.coalbagplugin;
 
-import com.google.common.collect.ImmutableList;
-import net.runelite.api.ItemID;
+import net.runelite.api.gameval.ItemID;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.ui.overlay.WidgetItemOverlay;
 import net.runelite.client.ui.overlay.components.TextComponent;
@@ -35,22 +34,17 @@ import javax.inject.Inject;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Point;
-import java.util.Collection;
 
 public class CoalBagOverlay extends WidgetItemOverlay
 {
 	private final CoalBagConfig config;
-	private static final Collection<Integer> COAL_BAG_IDS = ImmutableList.of(
-			ItemID.OPEN_COAL_BAG,
-			ItemID.COAL_BAG,
-			ItemID.COAL_BAG_12019,
-			ItemID.COAL_BAG_25627
-	);
+	private final CoalBag coalBag;
 
 	@Inject
-	private CoalBagOverlay(CoalBagConfig config)
+	private CoalBagOverlay(CoalBagConfig config, CoalBag coalBag)
 	{
 		this.config = config;
+		this.coalBag = coalBag;
 		showOnInventory();
 	}
 
@@ -58,18 +52,18 @@ public class CoalBagOverlay extends WidgetItemOverlay
 	public void renderItemOverlay(Graphics2D graphics, int itemId, WidgetItem itemWidget)
 	{
 
-		if (COAL_BAG_IDS.contains(itemId))
+		if (isCoalBag(itemId))
 		{
 			final Rectangle bounds = itemWidget.getCanvasBounds();
 			final TextComponent textComponent = new TextComponent();
 			textComponent.setPosition(new Point(bounds.x - 1, bounds.y + 8));
 
-			if (CoalBag.isUnknown())
+			if (coalBag.isUnknown())
 			{
 				textComponent.setColor(config.unknownCoalBagColor());
 				textComponent.setText("?");
 			}
-			else if (CoalBag.isEmpty())
+			else if (coalBag.isEmpty())
 			{
 				textComponent.setColor(config.emptyCoalBagColor());
 				textComponent.setText("0");
@@ -77,10 +71,17 @@ public class CoalBagOverlay extends WidgetItemOverlay
 			else
 			{
 				textComponent.setColor(config.knownCoalBagColor());
-				textComponent.setText(CoalBag.getAmount());
+				textComponent.setText(coalBag.getAmount());
 			}
 
 			textComponent.render(graphics);
 		}
+	}
+
+	private static boolean isCoalBag(int itemId)
+	{
+		return itemId == ItemID.COAL_BAG
+				|| itemId == ItemID.COAL_BAG_OPEN
+				|| itemId == ItemID.COAL_BAG_DUMMY;
 	}
 }
